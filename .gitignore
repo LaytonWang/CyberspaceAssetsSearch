@@ -136,3 +136,16 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Office
+*.csv
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.ppt
+*.pptx
+
+# Project
+.idea
+

@@ -1,0 +1,23 @@
+# 创建虚拟环境
+py -3.12 -m venv venv
+# 激活虚拟环境
+.\venv\Scripts\activate
+# 安装依赖包（使用清华源）
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+.\venv\Scripts\activate
+python assets_search.py -h
+
+python assets_search.py all -k 后台管理 -pz 1 -d 2.0
+python assets_search.py all -kf static\Test-Keywords.txt -pz 1 -d 2.0
+
+python assets_search.py hunter -k 后台管理 -pz 1 -sc "200,301,302" -d 2.0
+python assets_search.py hunter -kf static\Test-Keywords.txt -pz 1 -sc "200,301,302" -d 2.0
+
+python assets_search.py fofa -k 后台管理 -pz 1 -d 2.0
+python assets_search.py fofa -kf static\Test-Keywords.txt -pz 1 -d 2.0
+
+python assets_search.py quake -k 后台管理 -pz 1 -d 2.0
+python assets_search.py quake -kf static\Test-Keywords.txt -pz 1 -d 2.0
+
+
