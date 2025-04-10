@@ -138,7 +138,6 @@ dmypy.json
 cython_debug/
 
 # Office
-*.csv
 *.xls
 *.xlsx
 *.doc

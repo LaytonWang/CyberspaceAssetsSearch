@@ -19,8 +19,6 @@ def send_quake_search(api_key, search_command, args):
         "X-QuakeToken": api_key,  # api-key，用户登录后在个人中心获取
         "Content-Type": "application/json"
     }
-    # needed_fields = eval(get_config_value("needed_fields", "quake_fields"))
-    # print(f"needed_fields: {needed_fields}")
 
     data = {
         "query": f"""{search_command}""",  # 查询语法，即输入的查询内容
@@ -39,24 +37,47 @@ def send_quake_search(api_key, search_command, args):
     return res
 
 
-def format_quake_data(key_word, search_command, data_arr, needed_fields):
+def get_quake_field_value(field, data):
+    sub_data = data
+    sub_fields = field.split('.')
+    for sub_field in sub_fields:
+        sub_data = sub_data.get(sub_field)
+    field_value = sub_data
+    return field_value
+
+
+def generate_quake_url(data):
+    protocol = get_quake_field_value("service.name", data)
+    url = f"{protocol if protocol == "http" else "https"}://"
+
+    if domain := get_quake_field_value("domain", data):
+        url += domain
+    elif host := get_quake_field_value("service.http.host", data):
+        url += host
+    elif ip := get_quake_field_value("ip", data):
+        url += ip
+    port = get_quake_field_value("port", data)
+    url = f"{url}:{port}"
+
+    data.update({"url": url})
+    return data
+
+
+def format_quake_data(key_word, search_command, data_arr, needed_fields, args):
     for data in data_arr:
-        protocol = ""
+        if not data.get("url"):
+            data = generate_quake_url(data)
+
         format_data = [key_word, search_command]
         for field in needed_fields:
-            sub_data = data
-            sub_fields = field.split('.')
-            # print(f"sub_fields: {sub_fields}")
-            for sub_field in sub_fields:
-                sub_data = sub_data.get(sub_field)
-                # print(f"sub_data: {sub_data}")
-            format_data.append(str(sub_data))
-            if field == "service.name":
-                protocol = sub_data
-        protocol = "http" if protocol == "http" else "https"
-        url = f"{protocol}://{data.get("domain")}:{data.get("port")}"
-        format_data[2] = url
-        print(f"format_data: {format_data}")
+            field_value = get_quake_field_value(field, data)
+            format_data.append(str(field_value))
+
+        status_code = get_quake_field_value("service.http.status_code", data)
+        if str(status_code) not in args.status_code:
+            print(f"format_data: {format_data}")
+            continue
+        # print(f"format_data: {format_data}")
         yield format_data
 
 
@@ -80,7 +101,7 @@ def search_by_quake(api_key, key_word, needed_fields, args):
         print(f"search_result: {search_result}")
         return None
 
-    format_data = format_quake_data(key_word, search_command, data_arr, needed_fields)
+    format_data = format_quake_data(key_word, search_command, data_arr, needed_fields, args)
     return format_data
 
 

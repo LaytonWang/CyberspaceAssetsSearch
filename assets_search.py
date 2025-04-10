@@ -23,9 +23,9 @@ def arguments_parse():
     exc_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
 
     arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .txt .csv', default="")
-    arg_parser.add_argument('-p', '--page', type=int, help='default: 1', default=1)
+    # arg_parser.add_argument('-p', '--page', type=int, help='default: 1', default=1)
     arg_parser.add_argument('-pz', '--page_size', type=int, help='default: 10', default=10)
-    arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200,302" only for hunter', default="200")
+    arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200,302"', default="200")
     arg_parser.add_argument('-st', '--start_time', type=str, help='format: 2025-03-01', default="")
     arg_parser.add_argument('-et', '--end_time', type=str, help='format: 2025-03-30', default="")
     arg_parser.add_argument('-d', '--delay', type=float, help='default: 2.5', default=2.5)
@@ -71,7 +71,7 @@ def main():
         args.platform = platform
         result_file = result_file_judge(args.result_file, platform)
 
-        api_key = get_config_value("api_key", f"{platform}_key")
+        api_key = get_config_value("api_keys", f"{platform}_key")
         needed_fields = eval(get_config_value("needed_fields", f"{platform}_fields"))
         # print(f"needed_fields: {needed_fields}")
 
@@ -82,3 +82,4 @@ def main():
 if __name__ == '__main__':
     # arguments_parse()
     main()
+

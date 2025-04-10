@@ -25,7 +25,11 @@ def create_search_command(key_word, platform):
     b64_search_command = ""
     if URL_PATTERN.fullmatch(key_word):
         url_result = urlparse(key_word)
-        search_command = f'{COMMAND[platform]["protocol="]}"{url_result.scheme}"'  # 协议
+        if platform == "quake":
+            protocol = url_result.scheme if url_result.scheme == "http" else "http/ssl"
+            search_command = f'{COMMAND[platform]["protocol="]}"{protocol}"'
+        else:
+            search_command = f'{COMMAND[platform]["protocol="]}"{url_result.scheme}"'
         if DOMAIN_PATTERN.fullmatch(hostname := url_result.hostname):  # 域名
             search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["domain="]}"{hostname}"'
         else:
