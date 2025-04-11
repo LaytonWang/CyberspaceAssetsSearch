@@ -11,6 +11,9 @@ python assets_search.py -h
 python assets_search.py all -k 后台管理 -pz 1 -sc "200,301,302"
 python assets_search.py all -kf static\Test-Keywords.txt -pz 5 -sc "200,301,302"
 
+python assets_search.py hunter,fofa -k 后台管理 -pz 5 -sc "200,301,302"
+python assets_search.py hunter,fofa -kf static\Test-Keywords.txt -pz 5 -sc "200,301,302"
+
 python assets_search.py hunter -k 后台管理 -pz 1 -sc "200,301,302" -d 2.0
 python assets_search.py hunter -kf static\Test-Keywords.txt -pz 1 -sc "200,301,302" -d 2.0
 

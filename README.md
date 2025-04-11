@@ -40,32 +40,37 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 - 指定"单个平台"、“单个关键字”查询
 
 ```bash
-python sens_info_search.py hunter -k keyword
+python assets_search.py hunter -k keyword
 ```
 
 - 指定"单个平台"、“含有多个关键字的文件”查询（一行含有多个关键字，用逗号、空格、顿号隔开）
 
 ```bash
-python sens_info_search.py fofa -kf keywords.txt
+python assets_search.py fofa -kf keywords.txt
 ```
 
-- 指定“所有平台”查询
+- 指定“多个平台”查询
 
 ```bash
-python sens_info_search.py all -k keyword
-python sens_info_search.py all -kf keywords.txt
+python assets_search.py hunter,fofa -k keyword
+```
+
+- “所有平台”查询
+
+```bash
+python assets_search.py all -kf keywords.txt
 ```
 
 - 过滤响应结果的“status_code”
 
 ```bash
-python sens_info_search.py quake -k keyword -sc "200,301,302"
+python assets_search.py quake -k keyword -sc "200,301,302"
 ```
 
 - 指定“结果存放的文件”（支持：.txt .csv）
 
 ```bash
-python sens_info_search.py quake -k keyword -rf result.csv
+python assets_search.py quake -k keyword -rf result.csv
 ```
 
 
@@ -79,7 +84,7 @@ python assets_search.py -h
 ```
 
 ```bash
-usage: sens_info_search.py [-h] [-k KEYWORD | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY] platform
+usage: assets_search.py [-h] [-k KEYWORD | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY] platform
 
 positional arguments:
   platform              support: hunter、fofa、quake、all
@@ -109,6 +114,10 @@ options:
 # 更新日志
 
 
+
+##  v1.2.0  (2025.04.11)
+
+- 支持指定“多个平台”进行查询，如：python assets_search.py **hunter,fofa** -k keyword
 
 ##  v1.1.0  (2025.04.10)
 

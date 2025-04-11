@@ -56,22 +56,25 @@ def search_by_keywords(api_key, needed_fields, result_file, args):
 
 def main():
     args = arguments_parse()
-    platforms = eval(get_config_value("supported_platforms", "platforms"))
+    supported_platforms = eval(get_config_value("supported_platforms", "platforms"))
 
-    if (platform := args.platform) == "all":
-        pass
-    elif platform in platforms:
-        platforms = [platform]
+    if args.platform == "all":
+        platforms = supported_platforms
     else:
-        print(f"{platform} is not supported!", f"support: {platforms}")
-        return
+        platforms = re.split(r",|，|、", args.platform)
 
     for platform in platforms:
         print(f"platform: {platform}")
+        if platform not in supported_platforms:
+            print(f"!!! {platform} is not supported!", f"only support: {supported_platforms} !!!\n")
+            continue
         args.platform = platform
         result_file = result_file_judge(args.result_file, platform)
 
         api_key = get_config_value("api_keys", f"{platform}_key")
+        if not api_key:
+            print(f"!!! api key of {platform} is empty !!!\n")
+            continue
         needed_fields = eval(get_config_value("needed_fields", f"{platform}_fields"))
         # print(f"needed_fields: {needed_fields}")
 
