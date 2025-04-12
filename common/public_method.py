@@ -21,28 +21,44 @@ def create_path_pattern():
     return re.compile(pattern)
 
 
-def create_search_command(key_word, platform):
-    b64_search_command = ""
-    if URL_PATTERN.fullmatch(key_word):
-        url_result = urlparse(key_word)
+def create_command_from_url(url, platform):
+    url_result = urlparse(url)
+
+    protocol = url_result.scheme  # 协议
+    if platform == "quake":
+        protocol = "http" if protocol == "http" else "http/ssl"
+    search_command = f'{COMMAND[platform]["protocol="]}"{protocol}"'
+
+    if DOMAIN_PATTERN.fullmatch(hostname := url_result.hostname):  # 域名 或 ip
+        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["domain="]}"{hostname}"'
+    else:
+        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["ip="]}"{hostname}"'
+
+    if port := url_result.port:  # 端口
+        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["port="]}"{port}"'
+
+    if path := url_result.path:  # 路径
         if platform == "quake":
-            protocol = url_result.scheme if url_result.scheme == "http" else "http/ssl"
-            search_command = f'{COMMAND[platform]["protocol="]}"{protocol}"'
-        else:
-            search_command = f'{COMMAND[platform]["protocol="]}"{url_result.scheme}"'
-        if DOMAIN_PATTERN.fullmatch(hostname := url_result.hostname):  # 域名
-            search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["domain="]}"{hostname}"'
-        else:
-            search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["ip="]}"{hostname}"'
-        if port := url_result.port:
-            search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["port="]}"{port}"'
-    elif domain := DOMAIN_PATTERN.search(key_word):  # 域名
-        search_command = (f'{COMMAND[platform]["domain="]}"{domain.group(0)}" '
-                          f'{COMMAND[platform]["or"]} {COMMAND[platform]["host="]}"{domain.group(0)}"')
-    elif ip := IP_PATTERN.search(key_word):  # ip
-        search_command = f'{COMMAND[platform]["ip="]}"{ip.group(0)}"'
-    elif (path := create_path_pattern().search(key_word)) and platform == "quake":  # url path
-        search_command = f'{COMMAND[platform]["url_path="]}"{path.group(0)}"'
+            search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["url_path="]}"{path}"'
+    return search_command
+
+
+def create_search_command(key_word, platform):
+    search_command, b64_search_command = "", ""
+
+    if url_match := URL_PATTERN.fullmatch(key_word):  # 完整的URL
+        url = url_match.group(0)
+        search_command = create_command_from_url(url, platform)
+    elif domain_match := DOMAIN_PATTERN.search(key_word):  # 含有域名
+        domain = domain_match.group(0)
+        search_command = f'{COMMAND[platform]["domain="]}"{domain}"'
+        search_command += f' {COMMAND[platform]["or"]} {COMMAND[platform]["host="]}"{domain}"'
+    elif ip_match := IP_PATTERN.search(key_word):  # 含有ip
+        ip = ip_match.group(0)
+        search_command = f'{COMMAND[platform]["ip="]}"{ip}"'
+    elif (path_match := create_path_pattern().search(key_word)) and platform == "quake":  # url路径
+        path = path_match.group(0)
+        search_command = f'{COMMAND[platform]["url_path="]}"{path}"'
     else:
         search_command = f'{COMMAND[platform]["title="]}"{key_word}"'
         # search_command = (f'{COMMAND[platform]["title="]}"{key_word}" '
