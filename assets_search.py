@@ -18,12 +18,12 @@ def arguments_parse():
 
     arg_parser.add_argument('platform', type=str, help='support: hunter、fofa、quake、all')
 
-    exc_group = arg_parser.add_mutually_exclusive_group()
-    exc_group.add_argument('-k', '--keyword', type=str, help='one keyword', default="")
-    exc_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
+    keyword_group = arg_parser.add_mutually_exclusive_group()
+    keyword_group.add_argument('-k', '--keyword', type=str, help='one keyword', default="")
+    keyword_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
 
     arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .txt .csv', default="")
-    # arg_parser.add_argument('-p', '--page', type=int, help='default: 1', default=1)
+    arg_parser.add_argument('-tp', '--total_pages', type=int, help='default: 1', default=1)
     arg_parser.add_argument('-pz', '--page_size', type=int, help='default: 10', default=10)
     arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200,302"', default="200")
     arg_parser.add_argument('-st', '--start_time', type=str, help='format: 2025-03-01', default="")
@@ -33,6 +33,21 @@ def arguments_parse():
     args = arg_parser.parse_args()
     # print(type(args), args)
     return args
+
+
+def search_by_page(api_key, keyword, needed_fields, result_file, args):
+    if (total_pages := args.total_pages) < 1:
+        print(f"!!! total pages must be greater than 1 !!!\n")
+        return
+
+    for page in range(1, total_pages + 1):
+        print(f"page: {page}, page_size: {args.page_size}")
+        args.page = page
+        format_data = eval(f"search_by_{args.platform}")(api_key, keyword, needed_fields, args)
+        if format_data:
+            seave_to_file(needed_fields, format_data, result_file)
+        print(f"···delay {args.delay}s···\n")
+        time.sleep(args.delay)
 
 
 def search_by_keywords(api_key, needed_fields, result_file, args):
@@ -47,11 +62,7 @@ def search_by_keywords(api_key, needed_fields, result_file, args):
         for keyword in keywords:
             if keyword:
                 print(f"key_word:【{keyword}】")
-                format_data = eval(f"search_by_{args.platform}")(api_key, keyword, needed_fields, args)
-                if format_data:
-                    seave_to_file(needed_fields, format_data, result_file)
-                print(f"···delay {args.delay}s···\n")
-                time.sleep(args.delay)
+                search_by_page(api_key, keyword, needed_fields, result_file, args)
 
 
 def main():
@@ -69,14 +80,15 @@ def main():
             print(f"!!! {platform} is not supported!", f"only support: {supported_platforms} !!!\n")
             continue
         args.platform = platform
-        result_file = result_file_judge(args.result_file, platform)
-
         api_key = get_config_value("api_keys", f"{platform}_key")
         if not api_key:
-            print(f"!!! api key of {platform} is empty !!!\n")
+            print(f"!!! api_key of {platform} is empty !!!\n")
             continue
         needed_fields = eval(get_config_value("needed_fields", f"{platform}_fields"))
-        # print(f"needed_fields: {needed_fields}")
+        if not needed_fields:
+            print(f"!!! needed_fields of {platform} is empty !!!\n")
+            continue
+        result_file = result_file_judge(args.result_file, platform)
 
         search_by_keywords(api_key, needed_fields, result_file, args)
         print(f"search result saved to {result_file}\n")

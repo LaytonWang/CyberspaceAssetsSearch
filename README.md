@@ -30,8 +30,8 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ![image-20250410203713549](./assets/image-20250410203713549.png)
 
-- [api_keys]：配置“空间测绘平台”的api key（如：hunter（鹰图）、fofa、quake）
-- [needed_fields]：配置需要从搜索结果中获取的字段。
+- [api_keys]：配置“空间测绘平台”的api key
+- [needed_fields]：配置需要从搜索结果中获取的字段
 
 
 
@@ -70,7 +70,13 @@ python assets_search.py quake -k keyword -sc "200,301,302"
 - 指定“结果存放的文件”（支持：.txt .csv）
 
 ```bash
-python assets_search.py quake -k keyword -rf result.csv
+python assets_search.py hunter -k keyword -rf result.csv
+```
+
+- 指定“总页数”
+
+```bash
+python assets_search.py fofa -k keyword -tp 2 -pz 10
 ```
 
 
@@ -84,7 +90,8 @@ python assets_search.py -h
 ```
 
 ```bash
-usage: assets_search.py [-h] [-k KEYWORD | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY] platform
+usage: assets_search.py [-h] [-k KEYWORD | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-tp TOTAL_PAGES] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY]
+                        platform
 
 positional arguments:
   platform              support: hunter、fofa、quake、all
@@ -97,6 +104,8 @@ options:
                         like: keywords.csv
   -rf RESULT_FILE, --result_file RESULT_FILE
                         support: .txt .csv
+  -tp TOTAL_PAGES, --total_pages TOTAL_PAGES
+                        default: 1
   -pz PAGE_SIZE, --page_size PAGE_SIZE
                         default: 10
   -sc STATUS_CODE, --status_code STATUS_CODE
@@ -114,13 +123,18 @@ options:
 # 更新日志
 
 
+
+##  v1.3.0  (2025.04.15)
+
+- 支持指定“查询的总页数”
+
 ##  v1.2.1  (2025.04.12)
 
 - 优化“生成search_command”的方法
 
 ##  v1.2.0  (2025.04.11)
 
-- 支持指定“多个平台”进行查询，如：python assets_search.py **hunter,fofa** -k keyword
+- 支持指定“多个平台”查询
 
 ##  v1.1.0  (2025.04.10)
 
