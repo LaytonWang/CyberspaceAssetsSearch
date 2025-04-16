@@ -69,11 +69,11 @@ def search_by_hunter(api_key, key_word, needed_fields, args):
     data = search_result.get("data")
     if not data:
         print(f"search_result: {search_result}")
-        return None
+        return "empty"
     data_arr = data.get("arr")
     if not data_arr:
         print(f"search_result: {search_result}")
-        return None
+        return "empty"
 
     format_data = format_hunter_data(key_word, search_command, data_arr, needed_fields, args)
     return format_data

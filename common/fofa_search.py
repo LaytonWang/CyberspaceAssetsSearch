@@ -102,7 +102,7 @@ def search_by_fofa(api_key, key_word, needed_fields, args):
     data_arr = search_result.get("results")
     if not data_arr:
         print(f"search_result: {search_result}")
-        return None
+        return "empty"
 
     format_data = format_fofa_data(key_word, search_command, data_arr, needed_fields, args)
     return format_data

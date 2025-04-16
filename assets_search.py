@@ -44,6 +44,10 @@ def search_by_page(api_key, keyword, needed_fields, result_file, args):
         print(f"page: {page}, page_size: {args.page_size}")
         args.page = page
         format_data = eval(f"search_by_{args.platform}")(api_key, keyword, needed_fields, args)
+        if format_data == "empty":
+            print(f"···delay {args.delay}s···\n")
+            time.sleep(args.delay)
+            break
         if format_data:
             seave_to_file(needed_fields, format_data, result_file)
         print(f"···delay {args.delay}s···\n")
