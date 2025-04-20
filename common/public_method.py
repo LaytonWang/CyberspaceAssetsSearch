@@ -4,10 +4,9 @@
 # @Author : <Layton>
 # @File : public_method.py
 import re
-import base64
 from urllib.parse import urlparse
 
-from config import URL_PATTERN, DOMAIN_PATTERN, IP_PATTERN, COMMAND
+from config import URL_PATTERN, DOMAIN_PATTERN, IP_PATTERN, COMMANDS
 
 
 def create_path_pattern():
@@ -27,49 +26,64 @@ def create_command_from_url(url, platform):
     protocol = url_result.scheme  # 协议
     if platform == "quake":
         protocol = "http" if protocol == "http" else "http/ssl"
-    search_command = f'{COMMAND[platform]["protocol="]}"{protocol}"'
+    search_command = f'{COMMANDS[platform]["protocol="]}"{protocol}"'
 
     if DOMAIN_PATTERN.fullmatch(hostname := url_result.hostname):  # 域名 或 ip
-        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["domain="]}"{hostname}"'
+        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["domain="]}"{hostname}"'
     else:
-        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["ip="]}"{hostname}"'
+        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["ip="]}"{hostname}"'
 
     if port := url_result.port:  # 端口
-        search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["port="]}"{port}"'
+        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["port="]}"{port}"'
 
     if path := url_result.path:  # 路径
         if platform == "quake":
-            search_command += f' {COMMAND[platform]["and"]} {COMMAND[platform]["url_path="]}"{path}"'
+            search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["url_path="]}"{path}"'
     return search_command
 
 
 def create_search_command(key_word, platform):
-    search_command, b64_search_command = "", ""
-
     if url_match := URL_PATTERN.fullmatch(key_word):  # 完整的URL
         url = url_match.group(0)
         search_command = create_command_from_url(url, platform)
     elif domain_match := DOMAIN_PATTERN.search(key_word):  # 含有域名
         domain = domain_match.group(0)
-        search_command = f'{COMMAND[platform]["domain="]}"{domain}"'
-        search_command += f' {COMMAND[platform]["or"]} {COMMAND[platform]["host="]}"{domain}"'
+        search_command = f'{COMMANDS[platform]["domain="]}"{domain}"'
+        search_command += f' {COMMANDS[platform]["or"]} {COMMANDS[platform]["host="]}"{domain}"'
     elif ip_match := IP_PATTERN.search(key_word):  # 含有ip
         ip = ip_match.group(0)
-        search_command = f'{COMMAND[platform]["ip="]}"{ip}"'
+        search_command = f'{COMMANDS[platform]["ip="]}"{ip}"'
     elif (path_match := create_path_pattern().search(key_word)) and platform == "quake":  # url路径
         path = path_match.group(0)
-        search_command = f'{COMMAND[platform]["url_path="]}"{path}"'
+        search_command = f'{COMMANDS[platform]["url_path="]}"{path}"'
     else:
-        search_command = f'{COMMAND[platform]["title="]}"{key_word}"'
-        # search_command = (f'{COMMAND[platform]["title="]}"{key_word}" '
-        #                   f'{COMMAND[platform]["or"]} {COMMAND[platform]["body="]}"{key_word}"')
+        search_command = f'{COMMANDS[platform]["title="]}"{key_word}"'
+        # search_command = (f'{COMMANDS[platform]["title="]}"{key_word}" '
+        #                   f'{COMMANDS[platform]["or"]} {COMMANDS[platform]["body="]}"{key_word}"')
     print(f"search_command: {search_command}")
 
-    if platform == "hunter":
-        b64_search_command = base64.urlsafe_b64encode(search_command.encode("utf-8"))
-    elif platform == "fofa":
-        b64_search_command = base64.b64encode(search_command.encode("utf-8"))
-    return search_command, b64_search_command
+    return search_command
+
+
+def get_field_value(field, data):
+    sub_data = data
+    sub_fields = field.split('.')
+    for sub_field in sub_fields:
+        sub_data = sub_data.get(sub_field)
+    field_value = sub_data
+    return field_value
+
+
+def is_search_finished(total_size, args):
+    if total_size not in ["", "None", None]:
+        if total_size <= args.page_size:
+            return True
+        else:
+            args.sum_page_size += args.page_size
+            if total_size <= args.sum_page_size:
+                return True
+            elif args.sum_page_size == (args.total_pages * args.page_size):
+                return True
 
 
 if __name__ == '__main__':

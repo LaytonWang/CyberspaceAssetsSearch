@@ -6,7 +6,6 @@
 import os
 import re
 
-
 # 目录配置
 PROJECT_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CONFIG_DIR = os.path.join(PROJECT_BASE_DIR, 'config')
@@ -25,7 +24,7 @@ DOMAIN_PATTERN = re.compile(r'(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63}
 IP_PATTERN = re.compile(r'(\d{1,3}\.){3}\d{1,3}')
 
 # 查询命令配置
-COMMAND = {
+COMMANDS = {
     "hunter": {
         "and": "&&",
         "or": "||",
@@ -62,10 +61,23 @@ COMMAND = {
     }
 }
 
+# 数据总数字段
+TOTAL_SIZE_FIELDS = {
+    "hunter": "data.total",
+    "fofa": "size",
+    "quake": "meta.pagination.total",
+}
+
+# 数据列表字段
+DATA_ARR_FIELDS = {
+    "hunter": "data.arr",
+    "fofa": "results",
+    "quake": "data",
+}
 
 if __name__ == '__main__':
     # print(PROJECT_BASE_DIR)
     # print(CONFIG_DIR)
     # print(RESULTS_DIR)
-    print(COMMAND["hunter"])
-    print(COMMAND["hunter"]["and"])
+    print(COMMANDS["hunter"])
+    print(COMMANDS["hunter"]["and"])

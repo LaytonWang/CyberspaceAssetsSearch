@@ -28,8 +28,9 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 - config/config.ini文件
 
-![image-20250410203713549](./assets/image-20250410203713549.png)
+![image-20250419233426431](./assets/image-20250419233426431.png)
 
+- [platform_urls]：配置“空间测绘平台”的API接口URL
 - [api_keys]：配置“空间测绘平台”的api key
 - [needed_fields]：配置需要从搜索结果中获取的字段
 
@@ -37,10 +38,10 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ## 简单使用
 
-- 指定"单个平台"、“单个关键字”查询
+- 指定"单个平台"、“关键字”查询（多个关键字，用逗号、顿号隔开）
 
 ```bash
-python assets_search.py hunter -k keyword
+python assets_search.py hunter -k keyword1,keyword2
 ```
 
 - 指定"单个平台"、“含有多个关键字的文件”查询（一行含有多个关键字，用逗号、空格、顿号隔开）
@@ -90,16 +91,17 @@ python assets_search.py -h
 ```
 
 ```bash
-usage: assets_search.py [-h] [-k KEYWORD | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-tp TOTAL_PAGES] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY]
-                        platform
+usage: sens_info_search.py [-h] [-k KEYWORDS | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-tp TOTAL_PAGES] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME]
+                           [-d DELAY]
+                           platform
 
 positional arguments:
   platform              support: hunter、fofa、quake、all
 
 options:
   -h, --help            show this help message and exit
-  -k KEYWORD, --keyword KEYWORD
-                        one keyword
+  -k KEYWORDS, --keywords KEYWORDS
+                        keywords for search
   -kf KEYWORDS_FILE, --keywords_file KEYWORDS_FILE
                         like: keywords.csv
   -rf RESULT_FILE, --result_file RESULT_FILE
@@ -124,9 +126,14 @@ options:
 
 
 
+##  v1.3.2  (2025.04.20)
+
+- 将“空间测绘平台”平台的API接口URL放到配置文件中
+- 优化“分页查询”
+
 ##  v1.3.1  (2025.04.16)
 
-- 优化“分页查询”
+- 优化“分页查询”，当前页查询结果为空时，剩余页不再查询
 
 ##  v1.3.0  (2025.04.15)
 

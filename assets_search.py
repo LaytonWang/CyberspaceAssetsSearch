@@ -3,14 +3,16 @@
 # @Time : 2025/3/25 9:27
 # @Author : <Layton>
 # @File : sens_info_search.py
+import os
 import re
 import time
 import argparse
+from datetime import datetime, timedelta
 
-from common.hunter_search import search_by_hunter
-from common.fofa_search import search_by_fofa
-from common.quake_search import search_by_quake
-from common.file_operation import read_key_words, get_config_value, result_file_judge, seave_to_file
+from config import PROJECT_BASE_DIR, TOTAL_SIZE_FIELDS, DATA_ARR_FIELDS
+from common import SEND_SEARCH_FUNCS, FORMAT_DATA_FUNCS
+from common.public_method import create_search_command, get_field_value, is_search_finished
+from common.file_operation import read_keywords, get_config_value, result_file_adjust, seave_to_file
 
 
 def arguments_parse():
@@ -19,7 +21,7 @@ def arguments_parse():
     arg_parser.add_argument('platform', type=str, help='support: hunter、fofa、quake、all')
 
     keyword_group = arg_parser.add_mutually_exclusive_group()
-    keyword_group.add_argument('-k', '--keyword', type=str, help='one keyword', default="")
+    keyword_group.add_argument('-k', '--keywords', type=str, help='keywords for search', default="")
     keyword_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
 
     arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .txt .csv', default="")
@@ -35,41 +37,77 @@ def arguments_parse():
     return args
 
 
-def search_by_page(api_key, keyword, needed_fields, result_file, args):
+def send_platform_search(args):
+    search_command = create_search_command(args.keyword, args.platform)
+    if not args.start_time:
+        args.start_time = (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d')
+    if not args.end_time:
+        args.end_time = datetime.now().strftime('%Y-%m-%d')
+
+    search_result = SEND_SEARCH_FUNCS[args.platform](args, search_command)
+    search_result = search_result.json()
+    # print(json.dumps(search_result, indent=2, ensure_ascii=False))
+
+    total_size_field = TOTAL_SIZE_FIELDS[args.platform]
+    total_size = get_field_value(total_size_field, search_result)
+    # print(f"total_size: {total_size}")
+    if is_search_finished(total_size, args):
+        args.is_finish = True
+    # print(f"is_finish: {args.is_finish}")
+
+    data_arr_field = DATA_ARR_FIELDS[args.platform]
+    data_arr = get_field_value(data_arr_field, search_result)
+    if not data_arr:
+        print(f"search_result: {search_result}")
+        return None
+
+    format_data = FORMAT_DATA_FUNCS[args.platform](args, search_command, data_arr)
+    return format_data
+
+
+def search_by_pages(result_file, args):
     if (total_pages := args.total_pages) < 1:
         print(f"!!! total pages must be greater than 1 !!!\n")
         return
+    args.sum_page_size = 0
+    args.is_finish = False
 
     for page in range(1, total_pages + 1):
         print(f"page: {page}, page_size: {args.page_size}")
         args.page = page
-        format_data = eval(f"search_by_{args.platform}")(api_key, keyword, needed_fields, args)
-        if format_data == "empty":
+
+        format_data = send_platform_search(args)
+        if format_data:
+            seave_to_file(args.needed_fields, format_data, result_file)
+            args.has_data_saved = True
+
+        if args.is_finish:
             print(f"···delay {args.delay}s···\n")
             time.sleep(args.delay)
             break
-        if format_data:
-            seave_to_file(needed_fields, format_data, result_file)
         print(f"···delay {args.delay}s···\n")
         time.sleep(args.delay)
 
 
-def search_by_keywords(api_key, needed_fields, result_file, args):
-    word_lines = []
-    if keyword := args.keyword:
-        word_lines = [keyword]
+def search_by_keywords(result_file, args):
+    if keywords := args.keywords:
+        keywords_lines = [keywords]
     elif keywords_file := args.keywords_file:
-        word_lines = read_key_words(keywords_file)
+        keywords_lines = read_keywords(keywords_file)
+    else:
+        print("!!! keyword cannot be missing !!!\n")
+        return
 
-    for line in word_lines:
+    for line in keywords_lines:
         keywords = re.split(r",|，| |、", line)
         for keyword in keywords:
             if keyword:
-                print(f"key_word:【{keyword}】")
-                search_by_page(api_key, keyword, needed_fields, result_file, args)
+                print(f"key_word: [{keyword}]")
+                args.keyword = keyword
+                search_by_pages(result_file, args)
 
 
-def main():
+def search_by_platforms():
     args = arguments_parse()
     supported_platforms = eval(get_config_value("supported_platforms", "platforms"))
 
@@ -79,26 +117,41 @@ def main():
         platforms = re.split(r",|，|、", args.platform)
 
     for platform in platforms:
-        print(f"platform: {platform}")
+        print(f"platform:【{platform}】")
         if platform not in supported_platforms:
             print(f"!!! {platform} is not supported!", f"only support: {supported_platforms} !!!\n")
             continue
         args.platform = platform
+
+        platform_url = get_config_value("platform_urls", f"{platform}_url")
+        if not platform_url:
+            print(f"!!! platform_url of {platform} is empty !!!\n")
+            continue
+        args.platform_url = platform_url
+
         api_key = get_config_value("api_keys", f"{platform}_key")
         if not api_key:
             print(f"!!! api_key of {platform} is empty !!!\n")
             continue
+        args.api_key = api_key
+
         needed_fields = eval(get_config_value("needed_fields", f"{platform}_fields"))
         if not needed_fields:
             print(f"!!! needed_fields of {platform} is empty !!!\n")
             continue
-        result_file = result_file_judge(args.result_file, platform)
+        args.needed_fields = needed_fields
 
-        search_by_keywords(api_key, needed_fields, result_file, args)
-        print(f"search result saved to {result_file}\n")
+        result_file = result_file_adjust(args.result_file, platform)  # 结果文件调整
+        rel_result_file = os.path.relpath(result_file, PROJECT_BASE_DIR)  # 获取相对路径
+
+        args.has_data_saved = False
+        search_by_keywords(result_file, args)
+        if args.has_data_saved:
+            print(f"Search result saved to: {rel_result_file}\n")
+        else:
+            print("No result was saved!\n")
 
 
 if __name__ == '__main__':
     # arguments_parse()
-    main()
-
+    search_by_platforms()

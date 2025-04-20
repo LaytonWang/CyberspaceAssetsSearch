@@ -21,7 +21,7 @@ def get_config_value(section, key):
     return value
 
 
-def read_key_words(file):
+def read_keywords(file):
     if os.access(file, os.F_OK) is not True:
         print(f"File ({file}) is not exist!")
         return
@@ -50,7 +50,7 @@ def csv_has_header(file):
     return True
 
 
-def result_file_judge(file, platform):
+def result_file_adjust(file, platform):
     if not file:
         file_type = ".csv"
         cur_time = datetime.now().strftime('%Y%m%d-%H%M%S')
