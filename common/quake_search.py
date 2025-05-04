@@ -59,11 +59,6 @@ def format_quake_data(args, search_command, data_arr):
         for field in args.needed_fields:
             field_value = get_field_value(field, data)
             format_data.append(str(field_value))
-
-        status_code = get_field_value("service.http.status_code", data)
-        if str(status_code) not in args.status_code:
-            print(f"format_data: {format_data}")
-            continue
         # print(f"format_data: {format_data}")
         yield format_data
 

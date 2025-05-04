@@ -58,33 +58,15 @@ def generate_fofa_link(data):
     return data
 
 
-def find_fofa_status_code(data, status_code):
-    code_pattern = re.compile(r'HTTP.*? (\d{3}) ')
-    if header := data.get("header", ""):
-        status_code = code_pattern.search(header).group(1)
-    elif banner := data.get("banner", ""):
-        status_code = code_pattern.search(banner).group(1)
-
-    data.update({"status_code": status_code})
-    return data, status_code
-
-
 def format_fofa_data(args, search_command, data_arr):
     for data in data_arr:
         if not data.get("link"):
             data = generate_fofa_link(data)
-        status_code = str(data.get("status_code"))
-        if len(status_code) != 3:
-            data, status_code = find_fofa_status_code(data, status_code)
 
         format_data = [args.keyword, search_command]
         for field in args.needed_fields:
             value = data.get(field)
             format_data.append(str(value))
-
-        if status_code not in args.status_code:
-            print(f"format_data: {format_data}")
-            continue
         # print(f"format_data: {format_data}")
         yield format_data
 

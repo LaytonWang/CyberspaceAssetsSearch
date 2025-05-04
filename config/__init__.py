@@ -26,8 +26,6 @@ IP_PATTERN = re.compile(r'(\d{1,3}\.){3}\d{1,3}')
 # 查询命令配置
 COMMANDS = {
     "hunter": {
-        "and": "&&",
-        "or": "||",
         "protocol=": "protocol=",
         "domain=": "domain=",
         "host=": "domain.suffix=",
@@ -35,10 +33,9 @@ COMMANDS = {
         "port=": "ip.port=",
         "title=": "web.title=",
         "body=": "web.body=",
+        "status_code=": "header.status_code=",
     },
     "fofa": {
-        "and": "&&",
-        "or": "||",
         "protocol=": "protocol=",
         "domain=": "domain=",
         "host=": "host=",
@@ -46,10 +43,9 @@ COMMANDS = {
         "port=": "port=",
         "title=": "title=",
         "body=": "body=",
+        "status_code=": "status_code=",
     },
     "quake": {
-        "and": "AND",
-        "or": "OR",
         "protocol=": "service:",
         "domain=": "domain:",
         "host=": "hostname:",
@@ -58,6 +54,7 @@ COMMANDS = {
         "title=": "title:",
         "body=": "body:",
         "url_path=": "http_path:",
+        "status_code=": "status_code:",
     }
 }
 

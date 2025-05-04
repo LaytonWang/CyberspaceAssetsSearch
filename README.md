@@ -30,8 +30,8 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 ![image-20250419233426431](./assets/image-20250419233426431.png)
 
-- [platform_urls]：配置“空间测绘平台”的API接口URL
-- [api_keys]：配置“空间测绘平台”的api key
+- [platform_urls]：配置“空间测绘平台”API接口的URL
+- [api_keys]：配置“空间测绘平台”的API KEY
 - [needed_fields]：配置需要从搜索结果中获取的字段
 
 
@@ -65,7 +65,7 @@ python assets_search.py all -kf keywords.txt
 - 过滤响应结果的“status_code”
 
 ```bash
-python assets_search.py quake -k keyword -sc "200,301,302"
+python assets_search.py quake -k keyword -sc "200"
 ```
 
 - 指定“结果存放的文件”（支持：.txt .csv）
@@ -105,13 +105,13 @@ options:
   -kf KEYWORDS_FILE, --keywords_file KEYWORDS_FILE
                         like: keywords.csv
   -rf RESULT_FILE, --result_file RESULT_FILE
-                        support: .txt .csv
+                        support: .csv
   -tp TOTAL_PAGES, --total_pages TOTAL_PAGES
                         default: 1
   -pz PAGE_SIZE, --page_size PAGE_SIZE
                         default: 10
   -sc STATUS_CODE, --status_code STATUS_CODE
-                        format: "200,302"
+                        format: "200"
   -st START_TIME, --start_time START_TIME
                         format: 2025-03-01
   -et END_TIME, --end_time END_TIME
@@ -124,42 +124,49 @@ options:
 
 # 更新日志
 
+##  v3.3.3  (2025.05.04)
 
+- 优化“status_code过滤”查询
+- 优化“csv结果文件”保存
 
-##  v1.3.2  (2025.04.20)
+##  v3.3.2  (2025.04.20)
 
-- 将“空间测绘平台”平台的API接口URL放到配置文件中
+- 将“空间测绘平台”API接口的URL放到配置文件中
 - 优化“分页查询”
 
-##  v1.3.1  (2025.04.16)
+##  v3.3.1  (2025.04.16)
 
 - 优化“分页查询”，当前页查询结果为空时，剩余页不再查询
 
-##  v1.3.0  (2025.04.15)
+##  v3.3.0  (2025.04.15)
 
 - 支持指定“查询的总页数”
 
-##  v1.2.1  (2025.04.12)
+##  v3.2.1  (2025.04.12)
 
 - 优化“生成search_command”的方法
 
-##  v1.2.0  (2025.04.11)
+##  v3.2.0  (2025.04.11)
 
 - 支持指定“多个平台”查询
 
-##  v1.1.0  (2025.04.10)
+##  v3.1.0  (2025.04.10)
 
 - 优化“FOFA”获取“link”字段的方法
-
-
 - 增加“FOFA”查询结果“status_code”过滤
 - 优化“QUAKE”获取“url”字段的方法
 - 增加“QUAKE”查询结果“status_code”过滤
 
-##  v1.0.0  (2025.04.05)
+##  v3.0.0  (2025.04.05)
 
-- 给定“关键字”，调用“hunter(鹰图)、fofa、quake”的api接口，查询网络空间资产
+- 支持“QUAKE”api接口查询
 - 支持“all”参数，所有平台依次查询
 
+##  v2.0.0  (2025.04.01)
 
+- 支持“FOFA”api接口查询
+
+##  v1.0.0  (2025.03.27)
+
+- 给定“关键字”，调用hunter（鹰图）api接口，查询网络空间资产
 

@@ -8,19 +8,19 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 .\venv\Scripts\activate
 python assets_search.py -h
 
-python assets_search.py all -k 后台管理 -tp 1 -pz 1 -sc "200,301,302" -d 3.5
-python assets_search.py all -kf static\test-keywords.txt -tp 1 -pz 5 -sc "200,301,302" -d 3.5
+python assets_search.py all -k 后台管理 -tp 1 -pz 1 -sc "200" -d 3.5
+python assets_search.py all -kf static\test-keywords.txt -tp 1 -pz 5 -sc "200" -d 3.5
 
-python assets_search.py hunter,fofa -k 后台管理 -tp 1 -pz 5 -sc "200,301,302" -d 3.5
-python assets_search.py hunter,fofa -kf static\test-keywords.txt -tp 1 -pz 5 -sc "200,301,302" -d 3.5
+python assets_search.py hunter,fofa -k 后台管理 -tp 1 -pz 5 -sc "200" -d 3.5
+python assets_search.py hunter,fofa -kf static\test-keywords.txt -tp 1 -pz 5 -sc "200" -d 3.5
 
-python assets_search.py hunter -k 后台管理 -tp 2 -pz 2 -sc "200,301,302" -d 3.5
-python assets_search.py hunter -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200,301,302" -d 3.5
+python assets_search.py hunter -k 后台管理 -tp 1 -pz 2 -sc "302" -d 3.5
+python assets_search.py hunter -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200" -d 3.5
 
-python assets_search.py fofa -k 后台管理 -tp 2 -pz 2 -sc "200,301,302" -d 3.5
-python assets_search.py fofa -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200,301,302" -d 3.5
+python assets_search.py fofa -k 后台管理 -tp 1 -pz 2 -sc "200" -d 3.5
+python assets_search.py fofa -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200" -d 3.5
 
-python assets_search.py quake -k 后台管理 -tp 1 -pz 1 -sc "200,301,302" -d 3.5
-python assets_search.py quake -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200,301,302" -d 3.5
+python assets_search.py quake -k 后台管理 -tp 1 -pz 1 -sc "200" -d 3.5
+python assets_search.py quake -kf static\test-keywords.txt -tp 1 -pz 1 -sc "200" -d 3.5
 
 

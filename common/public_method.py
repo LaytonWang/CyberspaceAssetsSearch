@@ -29,27 +29,27 @@ def create_command_from_url(url, platform):
     search_command = f'{COMMANDS[platform]["protocol="]}"{protocol}"'
 
     if DOMAIN_PATTERN.fullmatch(hostname := url_result.hostname):  # 域名 或 ip
-        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["domain="]}"{hostname}"'
+        search_command += f' && {COMMANDS[platform]["domain="]}"{hostname}"'
     else:
-        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["ip="]}"{hostname}"'
+        search_command += f' && {COMMANDS[platform]["ip="]}"{hostname}"'
 
     if port := url_result.port:  # 端口
-        search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["port="]}"{port}"'
+        search_command += f' && {COMMANDS[platform]["port="]}"{port}"'
 
     if path := url_result.path:  # 路径
         if platform == "quake":
-            search_command += f' {COMMANDS[platform]["and"]} {COMMANDS[platform]["url_path="]}"{path}"'
+            search_command += f' && {COMMANDS[platform]["url_path="]}"{path}"'
     return search_command
 
 
-def create_search_command(key_word, platform):
+def create_search_command(key_word, status_code, platform):
     if url_match := URL_PATTERN.fullmatch(key_word):  # 完整的URL
         url = url_match.group(0)
         search_command = create_command_from_url(url, platform)
     elif domain_match := DOMAIN_PATTERN.search(key_word):  # 含有域名
         domain = domain_match.group(0)
         search_command = f'{COMMANDS[platform]["domain="]}"{domain}"'
-        search_command += f' {COMMANDS[platform]["or"]} {COMMANDS[platform]["host="]}"{domain}"'
+        search_command += f' || {COMMANDS[platform]["host="]}"{domain}"'
     elif ip_match := IP_PATTERN.search(key_word):  # 含有ip
         ip = ip_match.group(0)
         search_command = f'{COMMANDS[platform]["ip="]}"{ip}"'
@@ -58,10 +58,11 @@ def create_search_command(key_word, platform):
         search_command = f'{COMMANDS[platform]["url_path="]}"{path}"'
     else:
         search_command = f'{COMMANDS[platform]["title="]}"{key_word}"'
-        # search_command = (f'{COMMANDS[platform]["title="]}"{key_word}" '
-        #                   f'{COMMANDS[platform]["or"]} {COMMANDS[platform]["body="]}"{key_word}"')
-    print(f"search_command: {search_command}")
+        # search_command = f'{COMMANDS[platform]["title="]}"{key_word}" || {COMMANDS[platform]["body="]}"{key_word}"'
 
+    if status_code:
+        search_command = f'({search_command}) && {COMMANDS[platform]["status_code="]}"{status_code}"'
+    print(f"search_command: {search_command}")
     return search_command
 
 

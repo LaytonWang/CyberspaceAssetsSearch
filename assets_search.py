@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from config import PROJECT_BASE_DIR, TOTAL_SIZE_FIELDS, DATA_ARR_FIELDS
 from common import SEND_SEARCH_FUNCS, FORMAT_DATA_FUNCS
 from common.public_method import create_search_command, get_field_value, is_search_finished
-from common.file_operation import read_keywords, get_config_value, result_file_adjust, seave_to_file
+from common.file_operation import read_keywords, get_config_value, init_result_file, seave_to_file
 
 
 def arguments_parse():
@@ -24,21 +24,20 @@ def arguments_parse():
     keyword_group.add_argument('-k', '--keywords', type=str, help='keywords for search', default="")
     keyword_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
 
-    arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .txt .csv', default="")
+    arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .csv', default="")
     arg_parser.add_argument('-tp', '--total_pages', type=int, help='default: 1', default=1)
     arg_parser.add_argument('-pz', '--page_size', type=int, help='default: 10', default=10)
-    arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200,302"', default="200")
+    arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200"', default="")
     arg_parser.add_argument('-st', '--start_time', type=str, help='format: 2025-03-01', default="")
     arg_parser.add_argument('-et', '--end_time', type=str, help='format: 2025-03-30', default="")
     arg_parser.add_argument('-d', '--delay', type=float, help='default: 2.5', default=2.5)
 
     args = arg_parser.parse_args()
-    # print(type(args), args)
     return args
 
 
 def send_platform_search(args):
-    search_command = create_search_command(args.keyword, args.platform)
+    search_command = create_search_command(args.keyword, args.status_code, args.platform)
     if not args.start_time:
         args.start_time = (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d')
     if not args.end_time:
@@ -141,12 +140,12 @@ def search_by_platforms():
             continue
         args.needed_fields = needed_fields
 
-        result_file = result_file_adjust(args.result_file, platform)  # 结果文件调整
-        rel_result_file = os.path.relpath(result_file, PROJECT_BASE_DIR)  # 获取相对路径
-
+        result_file = init_result_file(args.result_file, platform, needed_fields)
         args.has_data_saved = False
         search_by_keywords(result_file, args)
+
         if args.has_data_saved:
+            rel_result_file = os.path.relpath(result_file, PROJECT_BASE_DIR)
             print(f"Search result saved to: {rel_result_file}\n")
         else:
             print("No result was saved!\n")
