@@ -6,6 +6,7 @@
 import os
 import re
 import time
+import json
 import argparse
 from datetime import datetime, timedelta
 
@@ -46,18 +47,17 @@ def send_platform_search(search_command, args):
     search_result = search_result.json()
     # print(json.dumps(search_result, indent=2, ensure_ascii=False))
 
-    total_size_field = TOTAL_SIZE_FIELDS[args.platform]
-    total_size = get_field_value(total_size_field, search_result)
-    # print(f"total_size: {total_size}")
-    if has_search_finished(total_size, args):
-        args.is_finished = True
-    # print(f"is_finish: {args.is_finished}")
-
     data_arr_field = DATA_ARR_FIELDS[args.platform]
     data_arr = get_field_value(data_arr_field, search_result)
     if not data_arr:
         print(f"search_result: {search_result}")
+        args.is_finished = True
         return None
+
+    total_size_field = TOTAL_SIZE_FIELDS[args.platform]
+    total_size = get_field_value(total_size_field, search_result)
+    if has_search_finished(total_size, args):
+        args.is_finished = True
 
     format_data = FORMAT_DATA_FUNCS[args.platform](args.needed_fields, data_arr)
     return format_data

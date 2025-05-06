@@ -50,7 +50,6 @@ def create_table_body(header_data, body_data):
 def init_html_base(result_file):
     template = TEMP_ENV.get_template("base_template.html")
     html_text = template.render(title=os.path.basename(result_file), card="{{ card }}")
-    time.sleep(0.1)
     write_to_html(result_file, mode="w", html_text=html_text)
 
 
@@ -60,7 +59,6 @@ def init_html_card(keyword, search_command, result_file):
     template = TEMP_ENV.get_template("card_template.html")
     card_text = template.render(keyword=keyword, search_command=search_command, collapse_id=collapse_id,
                                 table="{{ table }}")
-    time.sleep(0.1)
     template = RESULT_ENV.get_template(os.path.basename(result_file))
     html_text = template.render(card=card_text + "{{ card }}")
     time.sleep(0.1)
@@ -70,7 +68,6 @@ def init_html_card(keyword, search_command, result_file):
 def init_html_table(table_header, result_file):
     template = TEMP_ENV.get_template("table_template.html")
     table_text = template.render(table_header=table_header, table_body="{{ table_body }}")
-    time.sleep(0.1)
     template = RESULT_ENV.get_template(os.path.basename(result_file))
     html_text = template.render(table=table_text, card="{{ card }}")
     time.sleep(0.1)

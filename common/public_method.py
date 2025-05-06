@@ -73,6 +73,8 @@ def get_field_value(field, data):
     sub_fields = field.split('.')
     for sub_field in sub_fields:
         sub_data = sub_data.get(sub_field)
+        if not sub_data:
+            return None
     field_value = sub_data
     return field_value
 
