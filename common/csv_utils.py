@@ -6,6 +6,8 @@
 import os
 import csv
 
+__all__ = ['csv_has_header', 'write_to_csv', 'read_from_csv', 'init_csv_file', ]
+
 
 def csv_has_header(file):
     if not os.path.exists(file):
@@ -28,6 +30,11 @@ def read_from_csv(file):
     with open(file, "r", encoding="utf-8-sig") as f:
         csv_reader = csv.reader(f)
         yield from csv_reader
+
+
+def init_csv_file(result_file, needed_fields):
+    table_header = [["关键字", "查询命令", *needed_fields]]
+    write_to_csv(result_file, mode="a", data=table_header)
 
 
 if __name__ == '__main__':

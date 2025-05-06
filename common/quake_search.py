@@ -9,7 +9,7 @@ import requests
 from common.public_method import get_field_value
 
 
-def send_quake_search(args, search_command):
+def send_quake_search(search_command, args):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0",
         "X-QuakeToken": args.api_key,  # api-key，用户登录后在个人中心获取
@@ -50,13 +50,13 @@ def generate_quake_url(data):
     return data
 
 
-def format_quake_data(args, search_command, data_arr):
+def format_quake_data(needed_fields, data_arr):
     for data in data_arr:
         if not data.get("url"):
             data = generate_quake_url(data)
 
-        format_data = [args.keyword, search_command]
-        for field in args.needed_fields:
+        format_data = []
+        for field in needed_fields:
             field_value = get_field_value(field, data)
             format_data.append(str(field_value))
         # print(f"format_data: {format_data}")

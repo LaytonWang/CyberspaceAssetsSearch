@@ -4,11 +4,15 @@
 # @Author : <Layton>
 # @File : file_operation.py
 import os
+import itertools
 from datetime import datetime
 from configparser import ConfigParser
 
-from config import CONFIG_DIR, RESULTS_DIR
-from common.csv_utils import write_to_csv
+from config import PROJECT_BASE_DIR, CONFIG_DIR, RESULTS_DIR
+from common.csv_utils import write_to_csv, init_csv_file
+from common.html_utils import *
+
+__all__ = ['get_config_value', 'read_keywords', 'init_result_files', 'end_result_files', 'seave_to_file', ]
 
 
 def get_config_value(section, key):
@@ -32,37 +36,72 @@ def read_keywords(file):
             yield line.strip()
 
 
-def init_csv_file(result_file, needed_fields):
-    table_header = [["关键字", "查询命令", *needed_fields]]
-    write_to_csv(result_file, mode="a", data=table_header)
+def init_result_files(args):
+    result_files, file_types = [], [".csv", ".html"]
+    args.has_data_saved = False
 
-
-def init_result_file(result_file, platform, needed_fields):
-    if not result_file:
-        file_type = ".csv"
-        cur_time = datetime.now().strftime('%Y%m%d-%H%M%S')
-        result_file = os.path.join(RESULTS_DIR, f"{platform}_result_{cur_time}{file_type}")
+    if not args.result_file:
+        cur_datetime = datetime.now().strftime('%Y%m%d-%H%M%S')
+        for file_type in file_types:
+            result_file = os.path.join(RESULTS_DIR, f"{args.platform}_result_{cur_datetime}{file_type}")
+            result_files.append(result_file)
     else:
-        filename, file_type = os.path.splitext(result_file)
-        if not file_type:
+        filename, file_type = os.path.splitext(args.result_file)
+        if file_type not in file_types:
             file_type = ".csv"
         result_file = os.path.join(RESULTS_DIR, f"{filename}{file_type}")
+        result_files.append(result_file)
 
-    if os.path.exists(result_file):
-        with open(result_file, 'a+', encoding='utf-8-sig') as f:
-            f.truncate(0)
+    for result_file in result_files:
+        if os.path.exists(result_file):
+            with open(result_file, 'a+', encoding='utf-8') as f:
+                f.truncate(0)
 
-    init_csv_file(result_file, needed_fields)
-    return result_file
+        if result_file.endswith(".csv"):
+            init_csv_file(result_file, args.needed_fields)
+        elif result_file.endswith(".html"):
+            init_html_base(result_file)
+
+    return result_files
 
 
-def seave_to_file(needed_fields, format_data, result_file):
-    _, file_type = os.path.splitext(result_file)
+def end_result_files(result_files, args):
+    if not args.has_data_saved:
+        for result_file in result_files:
+            os.remove(result_file)
+        print("No result was saved!\n")
+        return
 
-    if file_type == ".csv":
-        write_to_csv(result_file, mode="a", data=format_data)
-    else:
-        print("File type is not supported!")
+    for result_file in result_files:
+        if result_file.endswith(".html"):
+            end_clear(result_file)
+
+    rel_result_file = os.path.relpath(RESULTS_DIR, PROJECT_BASE_DIR)
+    print(f"Search result saved to: .\\{rel_result_file}\\ \n")
+
+
+def seave_to_file(keyword, search_command, format_data, result_files, args):
+    format_datas = itertools.tee(format_data, 2)
+
+    for result_file in result_files:
+        _, file_type = os.path.splitext(result_file)
+
+        if file_type == ".csv":
+            csv_data = ([keyword, search_command, *item] for item in format_datas[0])
+            write_to_csv(result_file, mode="a", data=csv_data)
+        elif file_type == ".html":
+            if args.is_new_keyword:
+                init_html_card(keyword, search_command, result_file)
+                table_header = create_table_header(args.needed_fields)
+                init_html_table(table_header, result_file)
+                args.is_new_keyword = False
+
+            table_body = ""
+            for body_data in format_datas[1]:
+                table_body += create_table_body(args.needed_fields, body_data)
+            update_table_body(table_body, result_file)
+        else:
+            print("File type is not supported!")
 
 
 if __name__ == '__main__':

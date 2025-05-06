@@ -8,6 +8,8 @@ from urllib.parse import urlparse
 
 from config import URL_PATTERN, DOMAIN_PATTERN, IP_PATTERN, COMMANDS
 
+__all__ = ['create_search_command', 'get_field_value', 'has_search_finished', ]
+
 
 def create_path_pattern():
     # 定义路径各部分的正则组件
@@ -42,22 +44,22 @@ def create_command_from_url(url, platform):
     return search_command
 
 
-def create_search_command(key_word, status_code, platform):
-    if url_match := URL_PATTERN.fullmatch(key_word):  # 完整的URL
+def create_search_command(keyword, status_code, platform):
+    if url_match := URL_PATTERN.fullmatch(keyword):  # 完整的URL
         url = url_match.group(0)
         search_command = create_command_from_url(url, platform)
-    elif domain_match := DOMAIN_PATTERN.search(key_word):  # 含有域名
+    elif domain_match := DOMAIN_PATTERN.search(keyword):  # 含有域名
         domain = domain_match.group(0)
         search_command = f'{COMMANDS[platform]["domain="]}"{domain}"'
         search_command += f' || {COMMANDS[platform]["host="]}"{domain}"'
-    elif ip_match := IP_PATTERN.search(key_word):  # 含有ip
+    elif ip_match := IP_PATTERN.search(keyword):  # 含有ip
         ip = ip_match.group(0)
         search_command = f'{COMMANDS[platform]["ip="]}"{ip}"'
-    elif (path_match := create_path_pattern().search(key_word)) and platform == "quake":  # url路径
+    elif (path_match := create_path_pattern().search(keyword)) and platform == "quake":  # url路径
         path = path_match.group(0)
         search_command = f'{COMMANDS[platform]["url_path="]}"{path}"'
     else:
-        search_command = f'{COMMANDS[platform]["title="]}"{key_word}"'
+        search_command = f'{COMMANDS[platform]["title="]}"{keyword}"'
         # search_command = f'{COMMANDS[platform]["title="]}"{key_word}" || {COMMANDS[platform]["body="]}"{key_word}"'
 
     if status_code:
@@ -75,7 +77,7 @@ def get_field_value(field, data):
     return field_value
 
 
-def is_search_finished(total_size, args):
+def has_search_finished(total_size, args):
     if total_size not in ["", "None", None]:
         if total_size <= args.page_size:
             return True
@@ -89,4 +91,3 @@ def is_search_finished(total_size, args):
 
 if __name__ == '__main__':
     pass
-

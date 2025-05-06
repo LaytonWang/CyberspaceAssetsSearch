@@ -10,6 +10,7 @@ import re
 PROJECT_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 CONFIG_DIR = os.path.join(PROJECT_BASE_DIR, 'config')
 RESULTS_DIR = os.path.join(PROJECT_BASE_DIR, 'results')
+TEMPLATES_DIR = os.path.join(CONFIG_DIR, 'templates')
 
 # 正则匹配配置
 URL_PATTERN = re.compile(

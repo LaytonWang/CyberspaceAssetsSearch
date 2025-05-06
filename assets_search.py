@@ -9,10 +9,10 @@ import time
 import argparse
 from datetime import datetime, timedelta
 
-from config import PROJECT_BASE_DIR, TOTAL_SIZE_FIELDS, DATA_ARR_FIELDS
+from config import TOTAL_SIZE_FIELDS, DATA_ARR_FIELDS
 from common import SEND_SEARCH_FUNCS, FORMAT_DATA_FUNCS
-from common.public_method import create_search_command, get_field_value, is_search_finished
-from common.file_operation import read_keywords, get_config_value, init_result_file, seave_to_file
+from common.public_method import *
+from common.file_operation import *
 
 
 def arguments_parse():
@@ -24,7 +24,7 @@ def arguments_parse():
     keyword_group.add_argument('-k', '--keywords', type=str, help='keywords for search', default="")
     keyword_group.add_argument('-kf', '--keywords_file', type=str, help='like: keywords.csv', default="")
 
-    arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .csv', default="")
+    arg_parser.add_argument('-rf', '--result_file', type=str, help='support: .csv .html', default="")
     arg_parser.add_argument('-tp', '--total_pages', type=int, help='default: 1', default=1)
     arg_parser.add_argument('-pz', '--page_size', type=int, help='default: 10', default=10)
     arg_parser.add_argument('-sc', '--status_code', type=str, help='format: "200"', default="")
@@ -36,23 +36,22 @@ def arguments_parse():
     return args
 
 
-def send_platform_search(args):
-    search_command = create_search_command(args.keyword, args.status_code, args.platform)
+def send_platform_search(search_command, args):
     if not args.start_time:
         args.start_time = (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d')
     if not args.end_time:
         args.end_time = datetime.now().strftime('%Y-%m-%d')
 
-    search_result = SEND_SEARCH_FUNCS[args.platform](args, search_command)
+    search_result = SEND_SEARCH_FUNCS[args.platform](search_command, args)
     search_result = search_result.json()
     # print(json.dumps(search_result, indent=2, ensure_ascii=False))
 
     total_size_field = TOTAL_SIZE_FIELDS[args.platform]
     total_size = get_field_value(total_size_field, search_result)
     # print(f"total_size: {total_size}")
-    if is_search_finished(total_size, args):
-        args.is_finish = True
-    # print(f"is_finish: {args.is_finish}")
+    if has_search_finished(total_size, args):
+        args.is_finished = True
+    # print(f"is_finish: {args.is_finished}")
 
     data_arr_field = DATA_ARR_FIELDS[args.platform]
     data_arr = get_field_value(data_arr_field, search_result)
@@ -60,35 +59,34 @@ def send_platform_search(args):
         print(f"search_result: {search_result}")
         return None
 
-    format_data = FORMAT_DATA_FUNCS[args.platform](args, search_command, data_arr)
+    format_data = FORMAT_DATA_FUNCS[args.platform](args.needed_fields, data_arr)
     return format_data
 
 
-def search_by_pages(result_file, args):
+def search_by_pages(keyword, search_command, result_files, args):
     if (total_pages := args.total_pages) < 1:
         print(f"!!! total pages must be greater than 1 !!!\n")
         return
     args.sum_page_size = 0
-    args.is_finish = False
+    args.is_finished = False
 
     for page in range(1, total_pages + 1):
         print(f"page: {page}, page_size: {args.page_size}")
         args.page = page
 
-        format_data = send_platform_search(args)
+        format_data = send_platform_search(search_command, args)
         if format_data:
-            seave_to_file(args.needed_fields, format_data, result_file)
+            seave_to_file(keyword, search_command, format_data, result_files, args)
             args.has_data_saved = True
 
-        if args.is_finish:
-            print(f"···delay {args.delay}s···\n")
-            time.sleep(args.delay)
-            break
         print(f"···delay {args.delay}s···\n")
         time.sleep(args.delay)
 
+        if args.is_finished:
+            break
 
-def search_by_keywords(result_file, args):
+
+def search_by_keywords(result_files, args):
     if keywords := args.keywords:
         keywords_lines = [keywords]
     elif keywords_file := args.keywords_file:
@@ -102,8 +100,9 @@ def search_by_keywords(result_file, args):
         for keyword in keywords:
             if keyword:
                 print(f"key_word: [{keyword}]")
-                args.keyword = keyword
-                search_by_pages(result_file, args)
+                args.keyword, args.is_new_keyword = keyword, True
+                search_command = create_search_command(keyword, args.status_code, args.platform)
+                search_by_pages(keyword, search_command, result_files, args)
 
 
 def search_by_platforms():
@@ -140,15 +139,9 @@ def search_by_platforms():
             continue
         args.needed_fields = needed_fields
 
-        result_file = init_result_file(args.result_file, platform, needed_fields)
-        args.has_data_saved = False
-        search_by_keywords(result_file, args)
-
-        if args.has_data_saved:
-            rel_result_file = os.path.relpath(result_file, PROJECT_BASE_DIR)
-            print(f"Search result saved to: {rel_result_file}\n")
-        else:
-            print("No result was saved!\n")
+        result_files = init_result_files(args)
+        search_by_keywords(result_files, args)
+        end_result_files(result_files, args)
 
 
 if __name__ == '__main__':

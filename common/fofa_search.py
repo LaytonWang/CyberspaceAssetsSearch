@@ -9,7 +9,7 @@ import base64
 import requests
 
 
-def send_fofa_search(args, search_command):
+def send_fofa_search(search_command, args):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
     }
@@ -58,15 +58,15 @@ def generate_fofa_link(data):
     return data
 
 
-def format_fofa_data(args, search_command, data_arr):
+def format_fofa_data(needed_fields, data_arr):
     for data in data_arr:
         if not data.get("link"):
             data = generate_fofa_link(data)
 
-        format_data = [args.keyword, search_command]
-        for field in args.needed_fields:
-            value = data.get(field)
-            format_data.append(str(value))
+        format_data = []
+        for field in needed_fields:
+            field_value = data.get(field)
+            format_data.append(str(field_value))
         # print(f"format_data: {format_data}")
         yield format_data
 
