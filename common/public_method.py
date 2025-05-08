@@ -63,7 +63,9 @@ def create_search_command(keyword, status_code, platform):
         # search_command = f'{COMMANDS[platform]["title="]}"{key_word}" || {COMMANDS[platform]["body="]}"{key_word}"'
 
     if status_code:
-        search_command = f'({search_command}) && {COMMANDS[platform]["status_code="]}"{status_code}"'
+        if "||" in search_command:
+            search_command = f'({search_command})'
+        search_command = f'{search_command} && {COMMANDS[platform]["status_code="]}"{status_code}"'
     print(f"search_command: {search_command}")
     return search_command
 

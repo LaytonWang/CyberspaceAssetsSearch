@@ -91,14 +91,16 @@ def seave_to_file(keyword, search_command, format_data, result_files, args):
             write_to_csv(result_file, mode="a", data=csv_data)
         elif file_type == ".html":
             if args.is_new_keyword:
-                init_html_card(keyword, search_command, result_file)
+                args.data_index = 1
+                init_html_panel(keyword, search_command, result_file)
                 table_header = create_table_header(args.needed_fields)
                 init_html_table(table_header, result_file)
                 args.is_new_keyword = False
 
             table_body = ""
             for body_data in format_datas[1]:
-                table_body += create_table_body(args.needed_fields, body_data)
+                table_body += create_table_body(args.needed_fields, body_data, args.data_index)
+                args.data_index += 1
             update_table_body(table_body, result_file)
         else:
             print("File type is not supported!")

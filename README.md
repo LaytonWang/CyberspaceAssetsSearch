@@ -62,19 +62,19 @@ python assets_search.py hunter,fofa -k keyword
 python assets_search.py all -kf keywords.txt
 ```
 
-- 过滤响应结果的“status_code”
+- 指定响应结果的“status_code”查询
 
 ```bash
 python assets_search.py quake -k keyword -sc "200"
 ```
 
-- 指定“结果存放的文件”（支持：.txt .csv）
+- 指定“结果存放的文件”（仅支持：.csv .html ）
 
 ```bash
 python assets_search.py hunter -k keyword -rf result.csv
 ```
 
-- 指定“总页数”
+- 指定“总页数”，“每页”大小
 
 ```bash
 python assets_search.py fofa -k keyword -tp 2 -pz 10
@@ -91,9 +91,8 @@ python assets_search.py -h
 ```
 
 ```bash
-usage: sens_info_search.py [-h] [-k KEYWORDS | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-tp TOTAL_PAGES] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME]
-                           [-d DELAY]
-                           platform
+usage: assets_search.py [-h] [-k KEYWORDS | -kf KEYWORDS_FILE] [-rf RESULT_FILE] [-tp TOTAL_PAGES] [-pz PAGE_SIZE] [-sc STATUS_CODE] [-st START_TIME] [-et END_TIME] [-d DELAY]
+                        platform
 
 positional arguments:
   platform              support: hunter、fofa、quake、all
@@ -105,7 +104,7 @@ options:
   -kf KEYWORDS_FILE, --keywords_file KEYWORDS_FILE
                         like: keywords.csv
   -rf RESULT_FILE, --result_file RESULT_FILE
-                        support: .csv
+                        support: .csv .html
   -tp TOTAL_PAGES, --total_pages TOTAL_PAGES
                         default: 1
   -pz PAGE_SIZE, --page_size PAGE_SIZE
@@ -118,11 +117,16 @@ options:
                         format: 2025-03-30
   -d DELAY, --delay DELAY
                         default: 2.5
+
 ```
 
 
 
 # 更新日志
+
+##  v3.4.2  (2025.05.08)
+
+- 优化“html”结果展示
 
 ##  v3.4.1  (2025.05.06)
 
@@ -130,7 +134,7 @@ options:
 
 ##  v3.4.0  (2025.05.06)
 
-`- 支持输出“.html”文件，可以“展开/折叠”`
+- 支持输出“.html”文件，可以“展开/折叠”
 
 ##  v3.3.3  (2025.05.04)
 

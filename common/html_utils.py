@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 from config import RESULTS_DIR, TEMPLATES_DIR
 
 __all__ = ['read_from_html', 'write_to_html', 'create_table_header', 'create_table_body', 'init_html_base',
-           'init_html_card', 'init_html_table', 'update_table_body', 'end_clear', ]
+           'init_html_panel', 'init_html_table', 'update_table_body', 'end_clear', ]
 
 TEMP_ENV = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 RESULT_ENV = Environment(loader=FileSystemLoader(RESULTS_DIR))
@@ -31,14 +31,16 @@ def write_to_html(html_file, mode="w", html_text=None):
 
 def create_table_header(header_data):
     table_header = "<tr>"
+    table_header += f'<th data-field="index" data-sortable="true">index</th>'
     for item in header_data:
-        table_header += f"<td>{item}</td>"
+        table_header += f'<th data-field="{item}" data-sortable="true">{item}</th>'
     table_header += "</tr>"
     return table_header
 
 
-def create_table_body(header_data, body_data):
+def create_table_body(header_data, body_data, data_index):
     table_body = "<tr>"
+    table_body += f"<td>{data_index}</td>"
     for header_item, body_item in zip(header_data, body_data):
         if header_item in ["url", "link"]:
             body_item = f'<a href="{body_item}" target="_blank">{body_item}</a>'
@@ -49,18 +51,18 @@ def create_table_body(header_data, body_data):
 
 def init_html_base(result_file):
     template = TEMP_ENV.get_template("base_template.html")
-    html_text = template.render(title=os.path.basename(result_file), card="{{ card }}")
+    html_text = template.render(title=os.path.basename(result_file), panel="{{ panel }}")
     write_to_html(result_file, mode="w", html_text=html_text)
 
 
-def init_html_card(keyword, search_command, result_file):
+def init_html_panel(keyword, search_command, result_file):
     collapse_id = f"collapse_{datetime.now().strftime('%H%M%S')}"
 
-    template = TEMP_ENV.get_template("card_template.html")
-    card_text = template.render(keyword=keyword, search_command=search_command, collapse_id=collapse_id,
+    template = TEMP_ENV.get_template("panel_template.html")
+    panel_text = template.render(keyword=keyword, search_command=search_command, collapse_id=collapse_id,
                                 table="{{ table }}")
     template = RESULT_ENV.get_template(os.path.basename(result_file))
-    html_text = template.render(card=card_text + "{{ card }}")
+    html_text = template.render(panel=panel_text + "{{ panel }}")
     time.sleep(0.1)
     write_to_html(result_file, mode="w", html_text=html_text)
 
@@ -69,14 +71,14 @@ def init_html_table(table_header, result_file):
     template = TEMP_ENV.get_template("table_template.html")
     table_text = template.render(table_header=table_header, table_body="{{ table_body }}")
     template = RESULT_ENV.get_template(os.path.basename(result_file))
-    html_text = template.render(table=table_text, card="{{ card }}")
+    html_text = template.render(table=table_text, panel="{{ panel }}")
     time.sleep(0.1)
     write_to_html(result_file, mode="w", html_text=html_text)
 
 
 def update_table_body(table_body, result_file):
     template = RESULT_ENV.get_template(os.path.basename(result_file))
-    html_text = template.render(table_body=table_body + "{{ table_body }}", card="{{ card }}")
+    html_text = template.render(table_body=table_body + "{{ table_body }}", panel="{{ panel }}")
     time.sleep(0.5)
     write_to_html(result_file, mode="w", html_text=html_text)
 
