@@ -39,6 +39,7 @@ def read_keywords(file):
 def init_result_files(args):
     result_files, file_types = [], [".csv", ".html"]
     args.has_data_saved = False
+    os.makedirs(RESULTS_DIR, exist_ok=True)
 
     if not args.result_file:
         cur_datetime = datetime.now().strftime('%Y%m%d-%H%M%S')
