@@ -3,6 +3,7 @@
 # @Time : 2025/3/25 20:28
 # @Author : <Layton>
 # @File : hunter_search.py
+import re
 import base64
 
 import requests
@@ -35,8 +36,24 @@ def send_hunter_search(search_command, args):
     return res
 
 
+def find_hunter_icon(data):
+    url, icon_url =  data.get("url"), ""
+    banner =  data.get("banner")
+
+    icon_pattern = re.compile(r'<link rel=\\+"icon\\+".*?href=\\+"\.?(.*?)\\+".*?>')
+    icon_match = icon_pattern.search(banner)
+    if icon_match:
+        icon_url = url + icon_match.group(1)
+
+    data.update({"icon": icon_url})
+    return data
+
+
 def format_hunter_data(needed_fields, data_arr):
     for data in data_arr:
+        if not data.get("icon"):
+            data = find_hunter_icon(data)
+
         format_data = []
         for field in needed_fields:
             field_value = data.get(field)

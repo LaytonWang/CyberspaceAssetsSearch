@@ -5,6 +5,7 @@
 # @File : fofa_search.py
 import re
 import base64
+from urllib.parse import urlparse
 
 import requests
 
@@ -52,6 +53,9 @@ def generate_fofa_link(data):
             link += domain
         elif ip := data.get("ip"):
             link += ip
+
+    link_result = urlparse(link)
+    if not link_result.port:
         link = f"{link}:{data.get("port")}"
 
     data.update({"link": link})

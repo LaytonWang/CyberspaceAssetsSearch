@@ -81,13 +81,13 @@ def end_result_files(result_files, args):
 
 
 def seave_to_file(keyword, search_command, format_data, result_files, args):
-    format_datas = itertools.tee(format_data, 2)
+    format_datas = itertools.tee(format_data, len(result_files))
 
-    for result_file in result_files:
+    for i, result_file in enumerate(result_files):
         _, file_type = os.path.splitext(result_file)
 
         if file_type == ".csv":
-            csv_data = ([keyword, search_command, *item] for item in format_datas[0])
+            csv_data = ([keyword, search_command, *item] for item in format_datas[i])
             write_to_csv(result_file, mode="a", data=csv_data)
         elif file_type == ".html":
             if args.is_new_keyword:
@@ -98,7 +98,7 @@ def seave_to_file(keyword, search_command, format_data, result_files, args):
                 args.is_new_keyword = False
 
             table_body = ""
-            for body_data in format_datas[1]:
+            for body_data in format_datas[i]:
                 table_body += create_table_body(args.needed_fields, body_data, args.data_index)
                 args.data_index += 1
             update_table_body(table_body, result_file)

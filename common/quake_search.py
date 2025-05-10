@@ -3,6 +3,7 @@
 # @Time : 2025/3/25 20:28
 # @Author : <Layton>
 # @File : quake_search.py
+from urllib.parse import urlparse
 
 import requests
 
@@ -43,9 +44,14 @@ def generate_quake_url(data):
         url += host
     elif ip := get_field_value("ip", data):
         url += ip
-    port = get_field_value("port", data)
-    url = f"{url}:{port}"
 
+    url_result = urlparse(url)
+    if not url_result.port:
+        port = get_field_value("port", data)
+        url = f"{url}:{port}"
+
+    path = get_field_value("service.http.path", data)
+    url = url + path if path else url
     data.update({"url": url})
     return data
 

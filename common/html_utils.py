@@ -31,9 +31,11 @@ def write_to_html(html_file, mode="w", html_text=None):
 
 def create_table_header(header_data):
     table_header = "<tr>"
-    table_header += f'<th data-field="index" data-sortable="true">index</th>'
+    table_header += f'<th data-sortable="true">index</th>'
     for item in header_data:
-        table_header += f'<th data-field="{item}" data-sortable="true">{item}</th>'
+        if "." in item:
+            item = item.split(".")[-1]
+        table_header += f'<th data-sortable="true">{item}</th>'
     table_header += "</tr>"
     return table_header
 
