@@ -46,6 +46,8 @@ def create_table_body(header_data, body_data, data_index):
     for header_item, body_item in zip(header_data, body_data):
         if header_item in ["url", "link"]:
             body_item = f'<a href="{body_item}" target="_blank">{body_item}</a>'
+        if any(i in body_item for i in ["{{", "}}"]):
+            body_item = body_item.replace("{{", "{").replace("}}", "}")
         table_body += f"<td>{body_item}</td>"
     table_body += "</tr>"
     return table_body
@@ -60,20 +62,20 @@ def init_html_base(result_file):
 def init_html_panel(keyword, search_command, result_file):
     collapse_id = f"collapse_{datetime.now().strftime('%H%M%S')}"
 
-    template = TEMP_ENV.get_template("panel_template.html")
-    panel_text = template.render(keyword=keyword, search_command=search_command, collapse_id=collapse_id,
-                                table="{{ table }}")
-    template = RESULT_ENV.get_template(os.path.basename(result_file))
-    html_text = template.render(panel=panel_text + "{{ panel }}")
+    panel_temp = TEMP_ENV.get_template("panel_template.html")
+    panel_text = panel_temp.render(keyword=keyword, search_command=search_command, collapse_id=collapse_id,
+                                   table="{{ table }}")
+    result_temp = RESULT_ENV.get_template(os.path.basename(result_file))
+    html_text = result_temp.render(panel=panel_text + "{{ panel }}")
     time.sleep(0.1)
     write_to_html(result_file, mode="w", html_text=html_text)
 
 
 def init_html_table(table_header, result_file):
-    template = TEMP_ENV.get_template("table_template.html")
-    table_text = template.render(table_header=table_header, table_body="{{ table_body }}")
-    template = RESULT_ENV.get_template(os.path.basename(result_file))
-    html_text = template.render(table=table_text, panel="{{ panel }}")
+    table_temp = TEMP_ENV.get_template("table_template.html")
+    table_text = table_temp.render(table_header=table_header, table_body="{{ table_body }}")
+    result_temp = RESULT_ENV.get_template(os.path.basename(result_file))
+    html_text = result_temp.render(table=table_text, panel="{{ panel }}")
     time.sleep(0.1)
     write_to_html(result_file, mode="w", html_text=html_text)
 

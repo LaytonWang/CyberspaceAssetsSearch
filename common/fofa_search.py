@@ -42,16 +42,21 @@ def send_fofa_search(search_command, args):
 
 
 def generate_fofa_link(data):
+    ipv6_pattern = re.compile(r'^([0-9a-fA-F]{0,4}:)+([0-9a-fA-F]{0,4})$')
     host = data.get("host")
     if host and host.startswith("http"):
         link = host
     else:
         link = f"{data.get("protocol")}://"
         if host:
+            if ipv6_match := ipv6_pattern.fullmatch(host):
+                host = f"[{ipv6_match.group(0)}]"
             link += host
         elif domain := data.get("domain"):
             link += domain
         elif ip := data.get("ip"):
+            if ipv6_match := ipv6_pattern.fullmatch(ip):
+                ip = f"[{ipv6_match.group(0)}]"
             link += ip
 
     link_result = urlparse(link)

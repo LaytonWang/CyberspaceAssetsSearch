@@ -3,6 +3,7 @@
 # @Time : 2025/3/25 20:28
 # @Author : <Layton>
 # @File : quake_search.py
+import re
 from urllib.parse import urlparse
 
 import requests
@@ -35,14 +36,19 @@ def send_quake_search(search_command, args):
 
 
 def generate_quake_url(data):
+    ipv6_pattern = re.compile(r'^([0-9a-fA-F]{0,4}:)+([0-9a-fA-F]{0,4})$')
     protocol = get_field_value("service.name", data)
     url = f"{protocol if protocol == "http" else "https"}://"
 
     if domain := get_field_value("domain", data):
         url += domain
     elif host := get_field_value("service.http.host", data):
+        if ipv6_match := ipv6_pattern.fullmatch(host):
+            host = f"[{ipv6_match.group(0)}]"
         url += host
     elif ip := get_field_value("ip", data):
+        if ipv6_match := ipv6_pattern.fullmatch(ip):
+            ip = f"[{ipv6_match.group(0)}]"
         url += ip
 
     url_result = urlparse(url)
