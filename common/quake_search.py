@@ -38,7 +38,7 @@ def send_quake_search(search_command, args):
 def generate_quake_url(data):
     ipv6_pattern = re.compile(r'^([0-9a-fA-F]{0,4}:)+([0-9a-fA-F]{0,4})$')
     protocol = get_field_value("service.name", data)
-    url = f"{protocol if protocol == "http" else "https"}://"
+    url = f"{protocol if protocol == 'http' else 'https'}://"
 
     if domain := get_field_value("domain", data):
         url += domain

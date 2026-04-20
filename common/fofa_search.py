@@ -47,7 +47,7 @@ def generate_fofa_link(data):
     if host and host.startswith("http"):
         link = host
     else:
-        link = f"{data.get("protocol")}://"
+        link = f"{data.get('protocol')}://"
         if host:
             if ipv6_match := ipv6_pattern.fullmatch(host):
                 host = f"[{ipv6_match.group(0)}]"
@@ -61,7 +61,7 @@ def generate_fofa_link(data):
 
     link_result = urlparse(link)
     if not link_result.port:
-        link = f"{link}:{data.get("port")}"
+        link = f"{link}:{data.get('port')}"
 
     data.update({"link": link})
     return data
