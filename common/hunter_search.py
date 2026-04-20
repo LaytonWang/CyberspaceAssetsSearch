@@ -37,8 +37,8 @@ def send_hunter_search(search_command, args):
 
 
 def find_hunter_icon(data):
-    url, icon_url =  data.get("url"), ""
-    banner =  data.get("banner")
+    url, icon_url =  data.get("url", ""), ""
+    banner =  data.get("banner", "")
 
     icon_pattern = re.compile(r'<link rel=\\+"icon\\+".*?href=\\+"\.?(.*?)\\+".*?>')
     icon_match = icon_pattern.search(banner)
